@@ -41,6 +41,10 @@ sys_getpid(void)
 {
   return myproc()->pid;
 }
+int
+sys_cps145(void) {
+    return myps();
+}
 
 int
 sys_sbrk(void)

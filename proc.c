@@ -17,6 +17,7 @@ static struct proc *initproc;
 int nextpid = 1;
 extern void forkret(void);
 extern void trapret(void);
+extern char *states[];
 
 static void wakeup1(void *chan);
 
@@ -310,7 +311,30 @@ wait(void)
     sleep(curproc, &ptable.lock);  //DOC: wait-sleep
   }
 }
+int
+myps(void) {
+    struct proc *p;
+    sti();
 
+    // Loop over process table looking for process with pid
+    acquire(&ptable.lock);
+    cprintf("name \t pid \t state \t\t ppid \t \n");
+
+    for(p = ptable.proc; p < &ptable.proc[NPROC]; p++) {
+        int ppid = (p->parent) ? p->parent->pid : 0; // Use -1 if no parent
+
+        if (p->state == SLEEPING)
+            cprintf("%s \t %d \t SLEEPING \t %d \t \n", p->name, p->pid, ppid);
+        else if (p->state == RUNNING)
+            cprintf("%s \t %d \t RUNNING \t %d \t \n", p->name, p->pid, ppid);
+        else if (p->state == RUNNABLE)
+            cprintf("%s \t %d \t RUNNABLE \t %d \t \n", p->name, p->pid, ppid);
+    }
+ release(&ptable.lock);
+
+ return 22;
+
+}
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
